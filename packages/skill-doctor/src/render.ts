@@ -1,11 +1,12 @@
 import path from "node:path";
 import pc from "picocolors";
 import {
-  HEADER_INDENT_CHARS,
-  HEADER_MIN_SPLIT_WIDTH_CHARS,
-  HEADER_TARGET_WIDTH_CHARS,
   PERFECT_SCORE,
   SCORE_BAR_WIDTH_CHARS,
+  SECTION_RULE_MIN_WIDTH_CHARS,
+  SECTION_RULE_OFFSET_CHARS,
+  SUMMARY_LABEL_WIDTH_CHARS,
+  TABLE_SEPARATOR_EXTRA_CHARS,
 } from "./constants.js";
 import { findRule } from "./rules.js";
 import type {
@@ -15,6 +16,7 @@ import type {
   WorkspaceDiagnosisResult,
 } from "./types.js";
 import { colorizeByScore } from "./utils/colorize-by-score.js";
+import { createFramedLine, printFramedBox } from "./utils/framed-box.js";
 import { groupBy } from "./utils/group-by.js";
 import { highlighter } from "./utils/highlighter.js";
 import { indentMultilineText } from "./utils/indent-multiline-text.js";
@@ -40,29 +42,6 @@ const formatElapsedTime = (elapsedMilliseconds: number): string => {
   return `${(elapsedMilliseconds / 1_000).toFixed(1)}s`;
 };
 
-const getHeaderWidth = (): number =>
-  Math.max(
-    HEADER_MIN_SPLIT_WIDTH_CHARS,
-    Math.min(process.stdout.columns ?? HEADER_TARGET_WIDTH_CHARS, HEADER_TARGET_WIDTH_CHARS),
-  );
-
-const renderSplitLine = (
-  leftPlainText: string,
-  leftRenderedText: string,
-  rightPlainText: string,
-  rightRenderedText: string,
-): string[] => {
-  const innerWidth = getHeaderWidth() - HEADER_INDENT_CHARS;
-  const minimumGapChars = 4;
-
-  if (leftPlainText.length + rightPlainText.length + minimumGapChars > innerWidth) {
-    return [`  ${leftRenderedText}`, `  ${rightRenderedText}`];
-  }
-
-  const spacing = " ".repeat(innerWidth - leftPlainText.length - rightPlainText.length);
-  return [`  ${leftRenderedText}${spacing}${rightRenderedText}`];
-};
-
 const joinSummaryParts = (parts: string[]): string => {
   const separator = highlighter.dim(" • ");
   return parts.join(separator);
@@ -70,7 +49,22 @@ const joinSummaryParts = (parts: string[]): string => {
 
 const printSectionHeading = (title: string) => {
   logger.log(`  ${pc.bold(title)}`);
-  logger.log(`  ${highlighter.dim("─".repeat(Math.max(24, title.length + 10)))}`);
+  logger.log(
+    `  ${highlighter.dim("─".repeat(Math.max(SECTION_RULE_MIN_WIDTH_CHARS, title.length + SECTION_RULE_OFFSET_CHARS)))}`,
+  );
+};
+
+const buildSummaryLine = (
+  label: string,
+  plainValue: string,
+  renderedValue: string = plainValue,
+) => {
+  const paddedLabel = `${label}:`.padEnd(SUMMARY_LABEL_WIDTH_CHARS, " ");
+
+  return createFramedLine(
+    `${paddedLabel}${plainValue}`,
+    `${highlighter.dim(paddedLabel)}${renderedValue}`,
+  );
 };
 
 const formatFindingCount = (skill: SkillDiagnosisResult): string => {
@@ -95,19 +89,7 @@ const formatFindingCount = (skill: SkillDiagnosisResult): string => {
 };
 
 const printBranding = (score: number) => {
-  const scoreStateLabel =
-    score === 100 ? "perfect" : score >= 90 ? "excellent" : score >= 75 ? "healthy" : "needs work";
-  const headerLines = renderSplitLine(
-    "skill doctor",
-    pc.bold(colorizeByScore("skill doctor", score)),
-    `${score} ${scoreStateLabel}`,
-    `${pc.bold(colorizeByScore(`${score}`, score))} ${colorizeByScore(scoreStateLabel, score)}`,
-  );
-
-  for (const headerLine of headerLines) {
-    logger.log(headerLine);
-  }
-
+  logger.log(`  ${pc.bold(colorizeByScore("skill doctor", score))}`);
   logger.log(`  ${highlighter.dim("static diagnostics for agent skills")}`);
   logger.log(
     `  ${joinSummaryParts([
@@ -126,18 +108,32 @@ const printSummary = (result: WorkspaceDiagnosisResult) => {
   ).length;
   const warningCount = result.diagnostics.length - errorCount;
   const healthySkillCount = result.skills.filter((skill) => skill.diagnostics.length === 0).length;
+  const renderedFindings = joinSummaryParts([
+    errorCount > 0 ? highlighter.error(`${errorCount} errors`) : highlighter.dim("0 errors"),
+    warningCount > 0 ? highlighter.warn(`${warningCount} warnings`) : highlighter.dim("0 warnings"),
+  ]);
+  const plainFindings = `${errorCount} errors • ${warningCount} warnings`;
+  const renderedCoverage = joinSummaryParts([
+    pc.bold(`${result.skills.length} skills`),
+    `${highlighter.success(String(healthySkillCount))} healthy`,
+  ]);
+  const plainCoverage = `${result.skills.length} skills • ${healthySkillCount} healthy`;
 
-  logger.log(
-    `  ${joinSummaryParts([
-      `${pc.bold(String(result.skills.length))} skills scanned`,
-      `${highlighter.success(String(healthySkillCount))} healthy`,
-      errorCount > 0 ? highlighter.error(`${errorCount} errors`) : highlighter.dim("0 errors"),
-      warningCount > 0
-        ? highlighter.warn(`${warningCount} warnings`)
-        : highlighter.dim("0 warnings"),
+  printSectionHeading("scan summary");
+  printFramedBox([
+    buildSummaryLine(
+      "score",
+      `${result.score.score} / ${PERFECT_SCORE} ${result.score.label}`,
+      `${pc.bold(colorizeByScore(String(result.score.score), result.score.score))} ${highlighter.dim(`/ ${PERFECT_SCORE}`)} ${colorizeByScore(result.score.label, result.score.score)}`,
+    ),
+    buildSummaryLine("coverage", plainCoverage, renderedCoverage),
+    buildSummaryLine("findings", plainFindings, renderedFindings),
+    buildSummaryLine(
+      "time",
+      formatElapsedTime(result.elapsedMilliseconds),
       highlighter.info(formatElapsedTime(result.elapsedMilliseconds)),
-    ])}`,
-  );
+    ),
+  ]);
   logger.log(`  ${buildScoreBar(result.score.score)}`);
   logger.break();
 };
@@ -156,6 +152,7 @@ const printSkillTable = (skills: SkillDiagnosisResult[]) => {
   logger.log(
     `  ${highlighter.dim("name".padEnd(skillColumnWidth + 2))}${highlighter.dim("score".padEnd(8))}${highlighter.dim("findings")}`,
   );
+  logger.log(`  ${highlighter.dim("─".repeat(skillColumnWidth + TABLE_SEPARATOR_EXTRA_CHARS))}`);
 
   for (const skill of sortedSkills) {
     const paddedName = skill.skill.name.padEnd(skillColumnWidth);
